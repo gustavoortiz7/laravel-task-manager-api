@@ -5,14 +5,13 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Task;
+use App\Http\Resources\TaskResource;
 
 class TaskController extends Controller
 {
     public function index(Request $request)
     {
-        return response()->json(
-            $request->user()->tasks
-        );
+        return TaskResource::collection($request->user()->tasks);
     }
 
     public function store(Request $request)
@@ -27,7 +26,7 @@ class TaskController extends Controller
             'description' => $request->description,
         ]);
 
-        return response()->json($task, 201);
+        return new TaskResource($task);
     }
 
     public function update(Request $request, Task $task)
@@ -44,7 +43,7 @@ class TaskController extends Controller
 
         $task->update($request->only(['title', 'description', 'status']));
 
-        return response()->json($task);
+        return new TaskResource($task);
     }
 
     public function destroy(Request $request, Task $task)
