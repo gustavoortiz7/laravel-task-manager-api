@@ -11,7 +11,28 @@ class TaskController extends Controller
 {
     public function index(Request $request)
     {
-        return TaskResource::collection($request->user()->tasks);
+        $query = $request->user()->tasks();
+
+        // filtro por estado
+        if ($request->has('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // búsqueda por texto
+        if ($request->has('search')) {
+            $query->where('title', 'like', '%' . $request->search . '%');
+        }
+
+        // ordenamiento
+        if ($request->has('sort')) {
+            $query->orderBy($request->sort, 'asc');
+        } else {
+            $query->orderBy('created_at', 'desc');
+        }
+
+        $tasks = $query->paginate(5);
+
+        return TaskResource::collection($tasks);
     }
 
     public function store(Request $request)
